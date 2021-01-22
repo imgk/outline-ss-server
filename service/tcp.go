@@ -223,6 +223,13 @@ func (s *tcpService) handleConnection(listenerPort int, clientTCPConn *net.TCPCo
 	clientConn := metrics.MeasureConn(clientTCPConn, &proxyMetrics.ProxyClient, &proxyMetrics.ClientProxy)
 	cipherEntry, clientReader, clientSalt, timeToCipher, keyErr := findAccessKey(clientConn, remoteIP(clientTCPConn), s.ciphers)
 
+	// A manager for some functions
+	if !manager.CheckIP(clientTCPConn.RemoteAddr().(*net.TCPAddr).IP, cipherEntry.ID) {
+		time.AfterFunc(time.Second*3, func() { clientTCPConn.Close() })
+		return
+	}
+	// A manager for some functions
+
 	connError := func() *onet.ConnectionError {
 		if keyErr != nil {
 			logger.Debugf("Failed to find a valid cipher after reading %v bytes: %v", proxyMetrics.ClientProxy, keyErr)

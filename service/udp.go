@@ -191,6 +191,12 @@ func (s *udpService) Serve(clientConn net.PacketConn) error {
 					return onet.NewConnectionError("ERR_CIPHER", "Failed to unpack initial packet", err)
 				}
 
+				// A manager for some functions
+				if !manager.CheckIP(ip, keyID) {
+					return nil
+				}
+				// A manager for some functions
+
 				var onetErr *onet.ConnectionError
 				if payload, tgtUDPAddr, onetErr = s.validatePacket(textData); onetErr != nil {
 					return onetErr
